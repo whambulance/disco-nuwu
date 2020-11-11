@@ -10,20 +10,17 @@ token = open(dir_path + "\\bot.token", mode="r").read()
 client = discord.Client()
 
 embed = discord.Embed(
-        description="Degenerate-ize your messages!",
-        color=0x4103FC,
-    )
+    description="Degenerate-ize your messages!",
+    color=0x4103FC,
+)
 embed.set_author(
-        name="disco-nuwu",
-        url="https://github.com/whambulance/disco-nuwu",
-        icon_url="https://images.discordapp.net/avatars/689333255870480503/df4d10cc3f7027f13198f17ca3637173.png?size=512",
-    )
+    name="disco-nuwu",
+    url="https://github.com/whambulance/disco-nuwu",
+    icon_url="https://images.discordapp.net/avatars/689333255870480503/df4d10cc3f7027f13198f17ca3637173.png?size=512",
+)
 embed.add_field(
     name="!uwu",
-    value=(
-        "Add !uwu before your message to have me delete and"
-        " resend it!"
-    ),
+    value=("Add !uwu before your message to have me delete and" " resend it!"),
 )
 embed.add_field(
     name="Add a reaction",
@@ -35,7 +32,7 @@ embed.add_field(
 
 
 def uwu_str(message: str) -> str:
-    message = message.replace('!uwu ', '').replace('!uwu', '')
+    message = message.replace("!uwu ", "").replace("!uwu", "")
     message = discord.utils.escape_markdown(message)
     message = discord.utils.escape_mentions(message)
     return uwuify.uwu(message, flags=flags)
@@ -71,16 +68,14 @@ async def on_message(message):
 
         def check(reaction, user):
             return (
-                user == message.author and
-                reaction.message == message and
-                str(reaction.emoji) in ["🦊", "🐺"]
+                user == message.author
+                and reaction.message == message
+                and str(reaction.emoji) in ["🦊", "🐺"]
             )
 
         try:
             reaction, user = await client.wait_for(
-                'reaction_add',
-                timeout=120.0,
-                check=check
+                "reaction_add", timeout=120.0, check=check
             )
         except asyncio.TimeoutError:
             pass
