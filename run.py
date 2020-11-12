@@ -56,7 +56,7 @@ async def on_ready():
 @client.event
 async def on_message(message):
     if message.author.bot:
-        exit
+        return
     channel = message.channel
     author = message.author
     botmember = message.guild.get_member_named(str(message.guild.me))
@@ -78,7 +78,7 @@ async def on_message(message):
 @client.event
 async def on_reaction_add(reaction, user):
     if reaction.message.author.bot:
-        exit
+        return
     channel = reaction.message.channel
     author = reaction.message.author
     botmember = channel.guild.get_member_named(str(channel.guild.me))
