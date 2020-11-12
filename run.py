@@ -87,7 +87,7 @@ async def on_reaction_add(reaction, user):
 
     if str(reaction.emoji) in ["🦊", "🐺"]:
         reactions = reaction.message.reactions
-        count = sum([1 for i in reactions if i.emoji in ["🦊", "🐺"]])
+        count = sum([i.count for i in reactions if i.emoji in ["🦊", "🐺"]])
 
         if count <= 1:
             uwumessage = uwu_str(reaction.message.content)
