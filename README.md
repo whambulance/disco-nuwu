@@ -3,6 +3,8 @@ Degenerate-ize your messages!
 ___
 Add your Discord Bot Token to the same folder, in a file named "bot.token" - then execute run.py
 
+It also requires server members intent enabled under the Bot in the Discord Developer Portal
+
 The Discord bot permissions integer for disco-nuwu is 68608 (Send & Read message history, View Channels)
 
 disco-nuwu has two functions:
