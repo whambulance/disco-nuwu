@@ -7,7 +7,10 @@ import asyncio
 dir_path = os.path.dirname(os.path.realpath(__file__))
 flags = uwuify.SMILEY | uwuify.YU
 token = open(dir_path + "\\bot.token", mode="r").read()
-client = discord.Client()
+intents = discord.Intents.default()
+intents.members = True
+intents.reactions = True
+client = discord.Client(intents=intents)
 
 embed = discord.Embed(
     description="Degenerate-ize your messages!",
@@ -20,7 +23,11 @@ embed.set_author(
 )
 embed.add_field(
     name="!uwu",
-    value=("Add !uwu before your message to have me delete and" " resend it!"),
+    value=("Add !uwu before your message to have me" " resend it!"),
+)
+embed.add_field(
+    name="!uwud",
+    value=("Add !uwud before your message to have me delete and" " resend it!"),
 )
 embed.add_field(
     name="Add a reaction",
@@ -32,7 +39,8 @@ embed.add_field(
 
 
 def uwu_str(message: str) -> str:
-    message = message.replace("!uwu ", "").replace("!uwu", "")
+    message = message.replace("!uwu ", "").replace("!uwud ", "")
+    message = message.replace("!uwu", "").replace("!uwud", "")
     message = discord.utils.escape_markdown(message)
     message = discord.utils.escape_mentions(message)
     return uwuify.uwu(message, flags=flags)
@@ -54,55 +62,52 @@ async def on_message(message):
     author = message.author
     botmember = message.guild.get_member_named(str(message.guild.me))
     botname = uwu_str(author.nick) if author.nick else uwu_str(author.name)
+    msgstart = message.content.split(" ", 1)[0]
 
-    if message.content.startswith("!uwu "):
+    if msgstart in ["!uwu", "!uwud"]:
         uwumessage = uwu_str(message.content)
+        if msgstart == ("!uwud"):
+            await message.delete()
         await botmember.edit(nick=botname)
         await channel.send(uwumessage)
         await botmember.edit(nick=None)
 
-    elif message.content.startswith("!uwuhelp"):
+    elif msgstart == "!uwuhelp":
         await channel.send(embed=embed)
 
-    else:
 
-        def check(reaction, user):
-            return (
-                user == message.author
-                and reaction.message == message
-                and str(reaction.emoji) in ["🦊", "🐺"]
-            )
+@client.event
+async def on_reaction_add(reaction, user):
+    if reaction.message.author.bot:
+        exit
+    channel = reaction.message.channel
+    author = reaction.message.author
+    botmember = channel.guild.get_member_named(str(channel.guild.me))
+    botname = uwu_str(author.nick) if author.nick else uwu_str(author.name)
 
-        try:
-            reaction, user = await client.wait_for(
-                "reaction_add", timeout=120.0, check=check
-            )
-        except asyncio.TimeoutError:
-            pass
-        else:
-            uwumessage = uwu_str(message.content)
-            await channel.send(uwumessage)
+    if str(reaction.emoji) in ["🦊", "🐺"]:
+        reactions = reaction.message.reactions
+        count = sum([1 for i in reactions if i.emoji in ["🦊", "🐺"]])
 
+        if count <= 1:
+            uwumessage = uwu_str(reaction.message.content)
+            await botmember.edit(nick=botname)
+            sentmessage = await channel.send(uwumessage)
+            await botmember.edit(nick=None)
 
-# This doesn't work but I wish it did because it's less memory intensive than
-# the current solution
-# @client.event
-# async def on_reaction_add(reaction, user):
-#     if reaction.message.author.bot:
-#         exit
-#     channel = reaction.message.channel
-#     if str(reaction.emoji) in ["🦊", "🐺"]:
-#         counter = 0
-#         for e in reaction.message.reactions:
-#             if "🦊" in e.emoji or "🐺" in e.emoji:
-#                 counter += 1
-#                 if e.count > 1:
-#                     exit
-#         if counter > 1:
-#             exit
-#         newmessage = esc_formatting(reaction.message.content)
-#         uwumessage = uwuify.uwu(newmessage, flags=flags)
-#         sentmessage = await channel.send(uwumessage)
+            def check(chk_reaction, chk_user):
+                reactions = chk_reaction.message.reactions
+                count = sum([1 for i in reactions if i.emoji in ["🦊", "🐺"]])
+                return count == 0 and chk_reaction.message == reaction.message
+
+            try:
+                reaction, user = await client.wait_for(
+                    "reaction_remove", timeout=180.0, check=check
+                )
+            except asyncio.TimeoutError:
+                pass
+            else:
+                await sentmessage.delete()
 
 
 client.run(token)
