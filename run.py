@@ -40,7 +40,6 @@ embed.add_field(
 def uwu_str(message: str) -> str:
     message = message.replace("!uwu ", "").replace("!uwud ", "")
     message = message.replace("!uwu", "").replace("!uwud", "")
-    message = discord.utils.escape_markdown(message)
     message = discord.utils.escape_mentions(message)
     return uwuify.uwu(message, flags=flags)
 
